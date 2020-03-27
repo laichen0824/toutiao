@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+
+</head>
+<h1 align="center">用户账号管理</h1>
+<body>
+<div class="layui-input-inline">
+    <input type="text" name="name" id="name" placeholder="请输入用户名" autocomplete="off" class="layui-input"
+           style="border-radius:20px;padding:10px">
+</div>
+<button type="button" class="layui-btn layui-btn-normal" id="checkName">查询</button>
+
+<table id="show" lay-filter="show"></table>
+<script type="text/html" id="toolbar">
+    <button class="layui-btn layui-btn-danger layui-btn-sm " lay-event="del">删除</button>
+</script>
+<script src="/scripts/jquery.js"></script>
+<script src="/layui/layui.js"></script>
+<script>
+    show();
+
+    function show() {
+        layui.use(['layer', 'table'], function () {
+            let layer = layui.layer;
+            let table = layui.table;
+
+            //模糊查询
+            let checkbtn = $("button#checkName");
+            checkbtn.unbind();
+            checkbtn.click(function () {
+                check();
+            });
+
+            //查询业务
+            check();
+
+            function check() {
+                table.render({
+
+                    //绑定表格
+                    elem: '#show',
+                    //开启工具栏
+                    toolbar: true,
+                    //设置数据库中没有文本的情况
+                    text: {
+                        none: '数据库中暂无信息'
+                    },
+                    //设置风格
+                    skin: 'line',
+                    //开启隔行背景
+                    even: true,
+                    //发送异步请求的目的地
+                    url: '/showUser?name=' + $.trim($('input[name=name]').val()),
+                    method: 'post',
+
+                    //设置每页记录数
+                    limit: 10,
+                    page: true,
+
+                    cols: [[
+                        {type: 'radio', fixed: 'left'},
+                        {field: 'id', title: 'ID', hide: true},
+                        {field: 'name', title: '用户名', width: "40%", align: 'center'},
+                        {field: 'password', title: '用户密码', width: "40%", align: 'center'},
+                        {fixed: 'right', align: 'center', toolbar: '#toolbar'}
+                    ]]
+                });
+
+                //监听行工具事件
+                table.on('tool(show)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                    var data = obj.data //获得当前行数据
+                        , layEvent = obj.event; //获得 lay-event 对应的值
+                    layer.msg('请选择一行');
+                    if (layEvent === 'detail') {
+                        layer.msg('查看操作');
+                    } else if (layEvent === 'del') {
+                        layer.confirm('真的删除该数据？', function (index) {
+                            var id = data.id;
+                            obj.del(); //删除对应行（tr）的DOM结构
+                            layer.close(index);
+                            //向服务端发送删除指令
+                            $.ajax({
+                                url:"/deleteUser/"+id,
+                                method:'get',
+                                success:function (res) {
+                                    console.log(res)
+                                }
+                            })
+                        });
+                    } else if (layEvent === 'edit') {
+                        layer.msg('编辑操作');
+                    }
+                });
+            }
+
+        })
+    }
+</script>
+</body>
+</html>
