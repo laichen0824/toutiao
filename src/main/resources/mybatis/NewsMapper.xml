@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nowcoder.mapper.NewsMapper">
+    <resultMap id="BaseResultMap" type="com.nowcoder.model.News">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+            <arg column="title" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="link" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="image" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="like_count" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+            <arg column="comment_count" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+            <arg column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+            <arg column="is_delete" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+            <arg column="created_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        </constructor>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, title, link, image, like_count, comment_count, user_id, is_delete, created_date
+    </sql>
+
+    <select id="getById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from news
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <insert id="insert" parameterType="com.nowcoder.model.News">
+        insert into news
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="link != null">
+                link,
+            </if>
+            <if test="image != null">
+                image,
+            </if>
+            <if test="likeCount != null">
+                like_count,
+            </if>
+            <if test="commentCount != null">
+                comment_count,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="isDelete != null">
+                is_delete,
+            </if>
+            <if test="createdDate != null">
+                created_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="link != null">
+                #{link,jdbcType=VARCHAR},
+            </if>
+            <if test="image != null">
+                #{image,jdbcType=VARCHAR},
+            </if>
+            <if test="likeCount != null">
+                #{likeCount,jdbcType=INTEGER},
+            </if>
+            <if test="commentCount != null">
+                #{commentCount,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="isDelete != null">
+                #{isDelete,jdbcType=INTEGER},
+            </if>
+            <if test="createdDate != null">
+                #{createdDate,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.nowcoder.model.News">
+        update news
+        <set>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="link != null">
+                link = #{link,jdbcType=VARCHAR},
+            </if>
+            <if test="image != null">
+                image = #{image,jdbcType=VARCHAR},
+            </if>
+            <if test="likeCount != null">
+                like_count = #{likeCount,jdbcType=INTEGER},
+            </if>
+            <if test="commentCount != null">
+                comment_count = #{commentCount,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="isDelete != null">
+                is_delete = #{isDelete,jdbcType=INTEGER},
+            </if>
+            <if test="createdDate != null">
+                created_date = #{createdDate,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateCommentCount" parameterType="int">
+        update news
+        set comment_count = #{count}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateLikeCount" parameterType="int">
+        update news
+        set like_count = #{count}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="getNewsList" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from news
+        WHERE is_delete = 0
+        <if test="userId != 0">
+            and user_id = #{userId}
+        </if>
+        ORDER BY created_date DESC
+        LIMIT #{offset},#{limit}
+    </select>
+
+    <select id="getAllNews" resultType="hashmap">
+        select a.id, a.title, b.name as author, a.like_count as likeCount, a.comment_count as commentCount,
+        DATE_FORMAT(a.created_date,'%Y-%m-%d %H:%i:%S')  as createdDate
+        from news a
+        left join `user` b on a.user_id = b.id
+        where a.is_delete = 0
+        <if test="name != null">
+            and title like ${name}
+        </if>
+        ORDER BY created_date DESC
+    </select>
+
+    <update id="deleteByUserId" parameterType="int">
+        update news
+        set is_delete = 1
+        where user_id = #{userId,jdbcType=INTEGER}
+    </update>
+</mapper>
