@@ -1,15 +1,15 @@
 package com.nowcoder.interceptor;
 
-import com.nowcoder.dao.LoginTicketDAO;
-import com.nowcoder.dao.UserDAO;
+import com.nowcoder.mapper.LoginTicketMapper;
+import com.nowcoder.mapper.UserMapper;
 import com.nowcoder.model.HostHolder;
 import com.nowcoder.model.LoginTicket;
 import com.nowcoder.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,13 +19,13 @@ import java.util.Date;
 @Component
 public class PassportInterceptor implements HandlerInterceptor {
 
-    @Autowired
-    private LoginTicketDAO loginTicketDAO;
+    @Resource
+    private LoginTicketMapper loginTicketMapper;
 
-    @Autowired
-    private UserDAO userDAO;
+    @Resource
+    private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private HostHolder hostHolder;
 
     @Override
@@ -41,12 +41,12 @@ public class PassportInterceptor implements HandlerInterceptor {
         }
 
         if (ticket != null) {
-            LoginTicket loginTicket = loginTicketDAO.selectByTicket(ticket);
+            LoginTicket loginTicket = loginTicketMapper.getByTicket(ticket);
             if (loginTicket == null || loginTicket.getExpired().before(new Date()) || loginTicket.getStatus() != 0) {
                 return true;
             }
 
-            User user = userDAO.selectById(loginTicket.getUserId());
+            User user = userMapper.getById(loginTicket.getUserId());
             hostHolder.setUser(user);
         }
         return true;

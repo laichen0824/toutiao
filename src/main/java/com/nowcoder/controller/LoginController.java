@@ -10,12 +10,12 @@ import com.nowcoder.util.FileUtil;
 import com.nowcoder.util.ToutiaoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,12 +28,13 @@ import java.util.Map;
 
 @Controller
 public class LoginController {
+
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-    @Autowired
+    @Resource
     UserService userService;
 
-    @Autowired
+    @Resource
     EventProducer eventProducer;
 
     @RequestMapping(path = {"/reg/"}, method = {RequestMethod.GET, RequestMethod.POST})
@@ -96,9 +97,10 @@ public class LoginController {
         userService.logout(ticket);
         return "redirect:/";
     }
+
     @RequestMapping(path = "/cancel", method = RequestMethod.GET)
-    public String cancel(HttpServletRequest request,HttpServletResponse response) {
-        Cookie cookie = new Cookie("ticket",null);
+    public String cancel(HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = new Cookie("ticket", null);
         cookie.setMaxAge(0);
         cookie.setPath(request.getContextPath());
         response.addCookie(cookie);
@@ -106,27 +108,27 @@ public class LoginController {
     }
 
 
-        @RequestMapping("/file")
-        public String file(MultipartFile file,int id, HttpSession session) throws Exception {
-            if (file.isEmpty()) {
-                throw new Exception ("上传文件不能是空文件!");
-            }
-            if (!FileUtil.isImg(file.getOriginalFilename())) {
-                throw new Exception ("请上传正确格式文件!");
-            }
-            String filePath = "D://img//";
-
-            FileUtil.creatDir(filePath);
-            File dest = new File(filePath);
-            try {
-                file.transferTo(new File(dest,file.getOriginalFilename()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            userService.updateImg(new User(id,"/img/"+file.getOriginalFilename()));
-            return "index";
+    @RequestMapping("/file")
+    public String file(MultipartFile file, int id, HttpSession session) throws Exception {
+        if (file.isEmpty()) {
+            throw new Exception("上传文件不能是空文件!");
         }
+        if (!FileUtil.isImg(file.getOriginalFilename())) {
+            throw new Exception("请上传正确格式文件!");
+        }
+        String filePath = "D://img//";
 
+        FileUtil.creatDir(filePath);
+        File dest = new File(filePath);
+        try {
+            file.transferTo(new File(dest, file.getOriginalFilename()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        userService.updateImg(new User(id, "/img/" + file.getOriginalFilename()));
+        return "index";
     }
+
+}
 
 

@@ -84,9 +84,9 @@
                             layer.close(index);
                             //向服务端发送删除指令
                             $.ajax({
-                                url:"/deleteUser/"+id,
-                                method:'get',
-                                success:function (res) {
+                                url: "/deleteUser/" + id,
+                                method: 'get',
+                                success: function (res) {
                                     console.log(res)
                                 }
                             })

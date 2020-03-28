@@ -2,39 +2,53 @@ package com.nowcoder.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.nowcoder.dao.LoginTicketDAO;
-import com.nowcoder.dao.UserDAO;
-import com.nowcoder.dao.UserMapper;
+import com.nowcoder.mapper.CommentMapper;
+import com.nowcoder.mapper.LoginTicketMapper;
+import com.nowcoder.mapper.NewsMapper;
+import com.nowcoder.mapper.UserMapper;
 import com.nowcoder.model.LoginTicket;
 import com.nowcoder.model.User;
 import com.nowcoder.util.ToutiaoUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
-
 
 @Service
 public class UserService {
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    @Autowired
-    private UserDAO userDAO;
 
-    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
-    private LoginTicketDAO loginTicketDAO;
+    @Resource
+    private LoginTicketMapper loginTicketMapper;
 
-    public int deleteUser(Integer id){
-        return userDAO.deleteById(id);
+    @Resource
+    private CommentMapper commentMapper;
+
+    @Resource
+    private NewsMapper newsMapper;
+
+    public int deleteUser(Integer id) {
+        // 删除资讯
+        newsMapper.deleteByUserId(id);
+
+        // 删除评论
+        commentMapper.deleteByUserId(id);
+
+        User user = new User();
+        user.setId(id);
+        user.setIsDelete(1);
+        return userMapper.update(user);
     }
 
     public Map<String, Object> register(String username, String password) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>(16);
         if (StringUtils.isBlank(username)) {
             map.put("msgname", "用户名不能为空");
             return map;
@@ -45,7 +59,7 @@ public class UserService {
             return map;
         }
 
-        User user = userDAO.selectByName(username);
+        User user = userMapper.getByName(username);
 
         if (user != null) {
             map.put("msgname", "用户名已经被注册");
@@ -58,9 +72,11 @@ public class UserService {
         user.setSalt(UUID.randomUUID().toString().substring(0, 5));
         String head = String.format("http://images.nowcoder.com/head/%dt.png", new Random().nextInt(1000));
         user.setHeadUrl(head);
-        user.setPassword(ToutiaoUtil.MD5(password+user.getSalt()));
-        user.setStatus("0");
-        userDAO.addUser(user);
+        user.setPassword(ToutiaoUtil.MD5(password + user.getSalt()));
+        user.setUserRole(0);
+        user.setIsDelete(0);
+        user.setCreateDate(new Date());
+        userMapper.insert(user);
 
         // 登陆
         String ticket = addLoginTicket(user.getId());
@@ -70,7 +86,7 @@ public class UserService {
 
 
     public Map<String, Object> login(String username, String password) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>(16);
         if (StringUtils.isBlank(username)) {
             map.put("msgname", "用户名不能为空");
             return map;
@@ -81,14 +97,14 @@ public class UserService {
             return map;
         }
 
-        User user = userDAO.selectByName(username);
+        User user = userMapper.getByName(username);
 
         if (user == null) {
             map.put("msgname", "用户不存在或被删除");
             return map;
         }
 
-        if (!ToutiaoUtil.MD5(password+user.getSalt()).equals(user.getPassword())) {
+        if (!ToutiaoUtil.MD5(password + user.getSalt()).equals(user.getPassword())) {
             map.put("msgpwd", "密码不正确");
             return map;
         }
@@ -104,43 +120,45 @@ public class UserService {
         LoginTicket ticket = new LoginTicket();
         ticket.setUserId(userId);
         Date date = new Date();
-        date.setTime(date.getTime() + 1000*3600*24);
+        date.setTime(date.getTime() + 1000 * 3600 * 24);
         ticket.setExpired(date);
         ticket.setStatus(0);
         ticket.setTicket(UUID.randomUUID().toString().replaceAll("-", ""));
-        loginTicketDAO.addTicket(ticket);
+        loginTicketMapper.insert(ticket);
         return ticket.getTicket();
     }
 
     public User getUser(int id) {
-        return userDAO.selectById(id);
+        return userMapper.getById(id);
     }
 
     public void logout(String ticket) {
-        loginTicketDAO.updateStatus(ticket, 1);
-    }
-    public int updateImg(User user){
-       return userDAO.updateImg(user);
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setTicket(ticket);
+        loginTicket.setStatus(1);
+        loginTicketMapper.update(loginTicket);
     }
 
-    public Map<String,Object> queryUserList(String name,Integer pageNumber,Integer pageSize){
-        PageHelper.startPage(pageNumber,pageSize);
-        if(StringUtils.isNotBlank(name)){
+    public void updateImg(User user) {
+        userMapper.update(user);
+    }
+
+    public Map<String, Object> queryUserList(String name, Integer pageNumber, Integer pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        if (StringUtils.isNotBlank(name)) {
             name = "'%" + name + "%'";
         } else {
             name = null;
         }
-        List<User> users = userMapper.queryUserList(name);
+        List<User> users = userMapper.getUserList(name);
         PageInfo<User> pageInfo = new PageInfo<>(users);
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",users);
-        map.put("count",pageInfo.getTotal());
-        map.put("code","");
-        map.put("msg","");
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", users);
+        map.put("count", pageInfo.getTotal());
+        map.put("code", "");
+        map.put("msg", "");
         return map;
     }
-
-
 
 
 }

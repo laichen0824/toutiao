@@ -1,18 +1,17 @@
 package com.nowcoder.async;
 
 import com.alibaba.fastjson.JSON;
-import com.nowcoder.model.Message;
 import com.nowcoder.util.JedisAdapter;
 import com.nowcoder.util.RedisKeyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,11 +20,12 @@ import java.util.Map;
 
 @Service
 public class EventConsumer implements InitializingBean, ApplicationContextAware {
+
     private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
     private Map<EventType, List<EventHandler>> config = new HashMap<EventType, List<EventHandler>>();
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Resource
     JedisAdapter jedisAdapter;
 
     @Override
@@ -49,7 +49,7 @@ public class EventConsumer implements InitializingBean, ApplicationContextAware 
                 while (true) {
                     String key = RedisKeyUtil.getEventQueueKey();
                     List<String> events = jedisAdapter.brpop(0, key);
-                    if (events==null){
+                    if (events == null) {
                         logger.warn("请配置好redis！");
                         return;
                     }

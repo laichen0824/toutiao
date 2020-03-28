@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>头条资讯 </title>
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="viewport"
+          content="width=device-width, minimum-scale=1.0, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -35,8 +37,8 @@
             width: 100%; /* Full width */
             height: 100%; /* Full height */
             overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            background-color: rgb(0, 0, 0); /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
         }
 
         /* Modal Content */
@@ -47,7 +49,7 @@
             padding: 0;
             border: 1px solid #888;
             width: 30%;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
             -webkit-animation-name: animatetop;
             -webkit-animation-duration: 0.4s;
             animation-name: animatetop;
@@ -56,13 +58,25 @@
 
         /* Add Animation */
         @-webkit-keyframes animatetop {
-            from {top:-300px; opacity:0}
-            to {top:0; opacity:1}
+            from {
+                top: -300px;
+                opacity: 0
+            }
+            to {
+                top: 0;
+                opacity: 1
+            }
         }
 
         @keyframes animatetop {
-            from {top:-300px; opacity:0}
-            to {top:0; opacity:1}
+            from {
+                top: -300px;
+                opacity: 0
+            }
+            to {
+                top: 0;
+                opacity: 1
+            }
         }
 
         /* The Close Button */
@@ -86,22 +100,25 @@
             color: white;
         }
 
-        .modal-body {padding: 2px 16px;}
+        .modal-body {
+            padding: 2px 16px;
+        }
 
         .modal-footer {
             padding: 2px 16px;
             background-color: #888;
             color: white;
         }
-        #head{
+
+        #head {
             width: 30px;
-            height:30px;
+            height: 30px;
         }
     </style>
     <script>
         $(function () {
             let attr2 = $(".toBack").attr("id");
-            if(attr2!=1){
+            if (attr2 != 1) {
                 $(".toBack").hide();
             }
             $("#head").click(function () {
@@ -120,7 +137,8 @@
 <header class="navbar navbar-default navbar-static-top bs-docs-nav" id="top" role="banner">
     <div class="container">
         <div class="navbar-header">
-            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse"
+                    data-target=".bs-navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -141,9 +159,9 @@
                 <li class="js-share"><a href="javascript:void(0);">分享</a></li>
                 <li class=""><a href="/msg/list">站内信</a></li>
                 <li class=""><a href="/user/$!{user.id}/">$!{user.name}</a></li>
-                <li class=""><img  id="head" src="$!{user.headUrl}" name="$!{user.id}"/></li>
+                <li class=""><img id="head" src="$!{user.headUrl}" name="$!{user.id}"/></li>
                 <li class=""><a href="/cancel">注销</a></li>
-                <li class=""><a href="/toBack" id="$!{user.status}" class="toBack">管理中心</a></li>
+                <li class=""><a href="/toBack" id="$!{user.userRole}" class="toBack">管理中心</a></li>
                 #else
                 <li class="js-login"><a href="javascript:void(0);">登陆</a></li>
                 #end

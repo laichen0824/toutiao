@@ -1,34 +1,46 @@
 package com.nowcoder.service;
 
-import com.nowcoder.dao.MessageDAO;
+import com.nowcoder.mapper.MessageMapper;
 import com.nowcoder.model.Message;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 
 @Service
 public class MessageService {
-    @Autowired
-    MessageDAO messageDAO;
+
+    @Resource
+    MessageMapper messageMapper;
+
     public int addMessage(Message message) {
-        return messageDAO.addMessage(message);
+        return messageMapper.insert(message);
     }
 
-    public List<Message> getConversationDetail(String userId, int offset, int limit) {
-        return messageDAO.getConversationDetail(userId, offset, limit);
+    public List<Message> getConversationDetail(int userId, int offset, int limit) {
+        return messageMapper.getMessageList(userId, offset, limit);
     }
 
     public List<Message> getConversationList(int userId, int offset, int limit) {
-        return messageDAO.getConversationList(userId, offset, limit);
+        return messageMapper.getMessageList(userId, offset, limit);
     }
 
-    public int getConvesationUnreadCount(int userId, String conversationId) {
-        return messageDAO.getConvesationUnreadCount(userId);
+    public int getUnreadCount(int userId) {
+        return messageMapper.getMessageCount(userId, 0);
     }
-    public int deleteMessage(int id){
-        return messageDAO.deleteMessage(id);
+    public int getAllCount(int userId) {
+        return messageMapper.getMessageCount(userId, null);
+    }
+
+    public void read(){
+        messageMapper.read();
+    }
+
+    public int deleteMessage(int id) {
+        Message message = new Message();
+        message.setId(id);
+        message.setIsDelete(1);
+        return messageMapper.update(message);
     }
 }

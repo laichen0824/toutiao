@@ -1,12 +1,10 @@
 package com.nowcoder.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.nowcoder.dao.MessageDAO;
 import com.nowcoder.model.*;
 import com.nowcoder.service.MessageService;
 import com.nowcoder.service.UserService;
 import com.nowcoder.util.ToutiaoUtil;
-import com.qiniu.util.Json;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,15 +35,18 @@ public class MessageController {
     public String conversationDetail(Model model) {
         try {
             int localUserId = hostHolder.getUser().getId();
-            List<ViewObject> conversations = new ArrayList<ViewObject>();
+            List<ViewObject> conversations = new ArrayList<>();
             List<Message> conversationList = messageService.getConversationList(localUserId, 0, 10);
+            int allCount = messageService.getAllCount(localUserId);
+            int unreadCount = messageService.getUnreadCount(localUserId);
             for (Message msg : conversationList) {
                 ViewObject vo = new ViewObject();
                 vo.set("conversation", msg);
                 int targetId = msg.getToId();
                 User user = userService.getUser(targetId);
                 vo.set("user", user);
-                vo.set("unread", messageService.getConvesationUnreadCount(localUserId, msg.getConversationId()));
+                vo.set("unread", unreadCount);
+                vo.set("count", allCount);
                 conversations.add(vo);
             }
             model.addAttribute("conversations", conversations);
@@ -60,7 +60,7 @@ public class MessageController {
     public String conversationDetail(Model model, @Param("conversationId") String conversationId) {
         try {
             String userId = conversationId.split("_")[0];
-            List<Message> conversationList = messageService.getConversationDetail(userId, 0, 10);
+            List<Message> conversationList = messageService.getConversationDetail(Integer.parseInt(userId), 0, 10);
             List<ViewObject> messages = new ArrayList<>();
             for (Message msg : conversationList) {
                 ViewObject vo = new ViewObject();
@@ -73,6 +73,7 @@ public class MessageController {
                 vo.set("userId", user.getId());
                 messages.add(vo);
             }
+            messageService.read();
             model.addAttribute("messages", messages);
         } catch (Exception e) {
             logger.error("获取详情消息失败" + e.getMessage());
@@ -92,18 +93,18 @@ public class MessageController {
             msg.setFromId(fromId);
             msg.setToId(toId);
             msg.setCreatedDate(new Date());
-            //msg.setConversationId(fromId < toId ? String.format("%d_%d", fromId, toId) : String.format("%d_%d", toId, fromId));
             messageService.addMessage(msg);
             return ToutiaoUtil.getJSONString(msg.getId());
         } catch (Exception e) {
-            logger.error("增加评论失败" + e.getMessage());
-            return ToutiaoUtil.getJSONString(1, "插入评论失败");
+            logger.error("新增消息失败" + e.getMessage());
+            return ToutiaoUtil.getJSONString(1, "新增消息失败");
         }
     }
+
     @RequestMapping(path = {"/deleteMessage/{id}"}, method = {RequestMethod.GET})
     @ResponseBody
-    public Object deleteMessage(@PathVariable("id") int id){
-        if(messageService.deleteMessage(id)>0){
+    public Object deleteMessage(@PathVariable("id") int id) {
+        if (messageService.deleteMessage(id) > 0) {
             return JSON.toJSONString("true");
         }
         return JSON.toJSONString("false");

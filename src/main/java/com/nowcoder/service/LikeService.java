@@ -13,7 +13,7 @@ public class LikeService {
 
     public int getLikeStatus(int userId, int entityType, int entityId) {
         String likeKey = RedisKeyUtil.getLikeKey(entityId, entityType);
-        if(jedisAdapter.sismember(likeKey, String.valueOf(userId))) {
+        if (jedisAdapter.sismember(likeKey, String.valueOf(userId))) {
             return 1;
         }
         String disLikeKey = RedisKeyUtil.getDisLikeKey(entityId, entityType);

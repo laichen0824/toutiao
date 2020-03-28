@@ -23,12 +23,11 @@ import java.util.List;
 
 @Controller
 public class NewsController {
+
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
-    @Autowired
-    NewsService newsService;
 
     @Autowired
-    QiniuService qiniuService;
+    NewsService newsService;
 
     @Autowired
     HostHolder hostHolder;
@@ -54,28 +53,29 @@ public class NewsController {
             }
             // 评论
             List<Comment> comments = commentService.getCommentsByEntity(news.getId(), EntityType.ENTITY_NEWS);
-            List<ViewObject> commentVOs = new ArrayList<ViewObject>();
+            List<ViewObject> commentVos = new ArrayList<>();
             for (Comment comment : comments) {
                 ViewObject vo = new ViewObject();
                 vo.set("comment", comment);
                 vo.set("user", userService.getUser(comment.getUserId()));
-                commentVOs.add(vo);
+                commentVos.add(vo);
             }
-            model.addAttribute("comments", commentVOs);
+            model.addAttribute("comments", commentVos);
         }
         model.addAttribute("news", news);
         model.addAttribute("owner", userService.getUser(news.getUserId()));
         return "detail";
     }
+
     @RequestMapping(path = {"/deleteNews/{id}"}, method = {RequestMethod.GET})
-    public String deleteNews(@PathVariable("id") int id){
+    public String deleteNews(@PathVariable("id") int id) {
         newsService.deleteNews(id);
         return "redirect:/";
     }
 
     @RequestMapping("/deleteNews2/{id}")
     @ResponseBody
-    public void delete(@PathVariable("id") int id){
+    public void delete(@PathVariable("id") int id) {
         //删除评论
         newsService.deleteNews(id);
     }
@@ -92,17 +92,17 @@ public class NewsController {
             comment.setEntityId(newsId);
             comment.setEntityType(EntityType.ENTITY_NEWS);
             comment.setCreatedDate(new Date());
-            comment.setStatus(0);
+            comment.setIsDelete(0);
 
             commentService.addComment(comment);
+
             // 更新news里的评论数量
             int count = commentService.getCommentCount(comment.getEntityId(), comment.getEntityType());
-            newsService.updateCommentCount(comment.getEntityId(), count);
-            // 怎么异步化
+            newsService.updateCommentCount(comment.getEntityId(), count + 1);
         } catch (Exception e) {
             logger.error("增加评论失败" + e.getMessage());
         }
-        return "redirect:/news/" + String.valueOf(newsId);
+        return "redirect:/news/" + newsId;
     }
 
 
@@ -124,7 +124,6 @@ public class NewsController {
     public String uploadImage(@RequestParam("file") MultipartFile file) {
         try {
             String fileUrl = newsService.saveImage(file);
-            //String fileUrl = qiniuService.saveImage(file);
             if (fileUrl == null) {
                 return ToutiaoUtil.getJSONString(1, "上传图片失败");
             }
@@ -142,10 +141,11 @@ public class NewsController {
                           @RequestParam("link") String link) {
         try {
             News news = new News();
-            news.setCreatedDate(new Date());
             news.setTitle(title);
-            news.setImage(image);
             news.setLink(link);
+            news.setImage(image);
+            news.setIsDelete(0);
+            news.setCreatedDate(new Date());
             if (hostHolder.getUser() != null) {
                 news.setUserId(hostHolder.getUser().getId());
             } else {

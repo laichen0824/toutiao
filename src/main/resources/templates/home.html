@@ -11,98 +11,106 @@
             <form action="/file" method="post" enctype="multipart/form-data">
                 <input type="file" name="file">
                 <input type="hidden" name="id" id="id">
-                <input type="submit"value="修改">
+                <input type="submit" value="修改">
             </form>
         </div>
 
     </div>
 
 </div>
-    <div id="main">
+<div id="main">
 
 
-        <div class="container" id="daily">
-            <div class="jscroll-inner">
-                <div class="daily">
+    <div class="container" id="daily">
+        <div class="jscroll-inner">
+            <div class="daily">
 
-                    #set($cur_date = '')
-                    #foreach($vo in $vos)
-                    #if ($cur_date != $date.format('yyyy-MM-dd', $vo.news.createdDate))
-                        #if ($foreach.index > 0)
-                            </div> ## 上一个要收尾
+                #set($cur_date = '')
+                #foreach($vo in $vos)
+                #if ($cur_date != $date.format('yyyy-MM-dd', $vo.news.createdDate))
+                #if ($foreach.index > 0)
+            </div>
+            ## 上一个要收尾
+            #end
+            #set($cur_date = $date.format('yyyy-MM-dd', $vo.news.createdDate))
+            <h3 class="date">
+                <i class="fa icon-calendar"></i>
+                <span>头条资讯 &nbsp; $date.format('yyyy-MM-dd', $vo.news.createdDate)</span>
+            </h3>
+
+            <div class="posts">
+                #end
+                <div class="post">
+                    <div class="votebar">
+                        #if ($vo.like > 0)
+                        <button class="click-like up pressed" data-id="$!{vo.news.id}" title="赞同"><i
+                                class="vote-arrow"></i><span class="count">$!{vo.news.likeCount}</span></button>
+                        #else
+                        <button class="click-like up" data-id="$!{vo.news.id}" title="赞同"><i
+                                class="vote-arrow"></i><span class="count">$!{vo.news.likeCount}</span></button>
                         #end
-                        #set($cur_date = $date.format('yyyy-MM-dd', $vo.news.createdDate))
-                    <h3 class="date">
-                        <i class="fa icon-calendar"></i>
-                        <span>头条资讯 &nbsp; $date.format('yyyy-MM-dd', $vo.news.createdDate)</span>
-                    </h3>
+                        #if($vo.like < 0)
+                        <button class="click-dislike down pressed" data-id="$!{vo.news.id}" title="反对"><i
+                                class="vote-arrow"></i></button>
+                        #else
+                        <button class="click-dislike down" data-id="$!{vo.news.id}" title="反对"><i
+                                class="vote-arrow"></i></button>
+                        #end
+                    </div>
+                    <div class="content">
+                        <div style="display: inline-block">
+                            <img style="width: 80px" class="content-img" src="$!{vo.news.image}" alt="">
+                            <!--                                    <a href="/deleteNews/$!{vo.news.id}">删除</a>-->
+                        </div>
 
-                    <div class="posts">
-                    #end
-                        <div class="post">
-                            <div class="votebar">
-                                #if ($vo.like > 0)
-                                <button class="click-like up pressed" data-id="$!{vo.news.id}" title="赞同"><i class="vote-arrow"></i><span class="count">$!{vo.news.likeCount}</span></button>
-                                #else
-                                <button class="click-like up" data-id="$!{vo.news.id}" title="赞同"><i class="vote-arrow"></i><span class="count">$!{vo.news.likeCount}</span></button>
-                                #end
-                                #if($vo.like < 0)
-                                <button class="click-dislike down pressed" data-id="$!{vo.news.id}" title="反对"><i class="vote-arrow"></i></button>
-                                #else
-                                <button class="click-dislike down" data-id="$!{vo.news.id}" title="反对"><i class="vote-arrow"></i></button>
-                                #end
-                            </div>
-                            <div class="content" >
-                                <div style="display: inline-block">
-                                    <img style="width: 80px" class="content-img" src="$!{vo.news.image}" alt="">
-<!--                                    <a href="/deleteNews/$!{vo.news.id}">删除</a>-->
-                                </div>
+                        <div class="content-main" style="display: inline-block;margin-left: 5px;">
 
-                                <div class="content-main" style="display: inline-block;margin-left: 5px;">
+                            <h3 class="title">
+                                <a target="_blank" rel="external nofollow"
+                                   href="/news/$!{vo.news.id}">$!{vo.news.title}</a>
+                            </h3>
 
-                                    <h3 class="title">
-                                        <a target="_blank" rel="external nofollow" href="/news/$!{vo.news.id}">$!{vo.news.title}</a>
-                                    </h3>
-
-                                    <div class="meta">
-                                        $!{vo.news.link}
-                                        <span>
+                            <div class="meta">
+                                $!{vo.news.link}
+                                <span>
                                             <i class="fa icon-comment"></i> $!{vo.news.commentCount}
                                         </span>
-                                    </div>
-
-                                </div>
                             </div>
 
-                            <div class="user-info">
-                                <div class="user-avatar">
-                                    <a href="/user/$!{vo.user.id}/"><img width="32" class="img-circle" src="$!{vo.user.headUrl}"></a>
-                                </div>
+                        </div>
+                    </div>
 
-
-                            </div>
-
-                            <div class="subject-name">来自 <a href="/user/$!{vo.user.id}/">$!{vo.user.name}</a></div>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <a href="/user/$!{vo.user.id}/"><img width="32" class="img-circle"
+                                                                 src="$!{vo.user.headUrl}"></a>
                         </div>
 
 
-                    #if ($foreach.count == $vos.size()) ##最后有个元素要收尾
                     </div>
-                    #end
 
-                    #end
-
-
+                    <div class="subject-name">来自 <a href="/user/$!{vo.user.id}/">$!{vo.user.name}</a></div>
                 </div>
-            </div>
-        </div>
 
+
+                #if ($foreach.count == $vos.size()) ##最后有个元素要收尾
+            </div>
+            #end
+
+            #end
+
+
+        </div>
     </div>
+</div>
+
+</div>
 
 
 #if ($pop)
 <script>
-window.loginpop = $!{pop};
+    window.loginpop = $
+    !{pop};
 </script>
 
 #end

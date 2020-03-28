@@ -7,34 +7,29 @@ import com.nowcoder.model.ViewObject;
 import com.nowcoder.service.LikeService;
 import com.nowcoder.service.NewsService;
 import com.nowcoder.service.UserService;
-import com.nowcoder.util.MailSender;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Controller
 public class HomeController {
-    @Autowired
+
+    @Resource
     NewsService newsService;
 
-    @Autowired
+    @Resource
     UserService userService;
 
-    @Autowired
+    @Resource
     LikeService likeService;
 
-    @Autowired
+    @Resource
     HostHolder hostHolder;
-
-    @Autowired
-    MailSender mailSender;
 
     private List<ViewObject> getNews(int userId, int offset, int limit) {
         List<News> newsList = newsService.getLatestNews(userId, offset, limit);

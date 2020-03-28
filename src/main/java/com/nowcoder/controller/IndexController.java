@@ -105,12 +105,6 @@ public class IndexController {
     @RequestMapping("/redirect/{code}")
     public String redirect(@PathVariable("code") int code,
                            HttpSession session) {
-        /*
-        RedirectView red = new RedirectView("/", true);
-        if (code == 301) {
-            red.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-        }
-        return red;*/
         session.setAttribute("msg", "Jump from redirect.");
         return "redirect:/";
     }
